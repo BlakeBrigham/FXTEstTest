@@ -7,12 +7,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
+
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.CalcModel;
+import model.Operation;
 import view.MainController;
 
 @ExtendWith(ApplicationExtension.class)
@@ -51,18 +55,49 @@ public class ViewTests
 				.queryAs(Label.class)).hasText(result);
 	}
 	
-	private void checkAddition(FxRobot robot, String recentResult, String newResult, String num1, String num2) {
-		checkResult(robot, recentResult);
-		enterNums(robot, num1, num2);
-		robot.clickOn("#AddButton");
-		checkResult(robot, newResult);
+	private void checkHistory(FxRobot robot, String history) {
+	    ListView<Operation> historyListView = robot.lookup("#HistoryList").queryAs(ListView.class);
+	    ObservableList<Operation> items = historyListView.getItems();
+	    Assertions.assertThat(items.toString()).contains(history);
 	}
+
+	
+	private void checkAddition(FxRobot robot, String recentResult, String newResult, String num1, String num2) {
+	    checkResult(robot, recentResult);
+	    enterNums(robot, num1, num2);
+	    robot.clickOn("#AddButton");
+	    checkResult(robot, newResult);
+
+	    if (!num1.contains(".")) {
+	        num1 = num1 + ".0";
+	    }
+	    if (!num2.contains(".")) {
+	        num2 = num2 + ".0";
+	    }
+	    if (!newResult.contains(".")) {
+	        newResult = newResult + ".0";
+	    }
+	    String history = num1 + " + " + num2 + " = " + newResult;
+	    checkHistory(robot, history);
+	}
+
 	
 	private void checkSubtraction(FxRobot robot, String recentResult, String newResult, String num1, String num2) {
 		checkResult(robot, recentResult);
 		enterNums(robot, num1, num2);
 		robot.clickOn("#SubButton");
 		checkResult(robot, newResult);
+		if (!num1.contains(".")) {
+	        num1 = num1 + ".0";
+	    }
+	    if (!num2.contains(".")) {
+	        num2 = num2 + ".0";
+	    }
+	    if (!newResult.contains(".")) {
+	        newResult = newResult + ".0";
+	    }
+	    String history = num1 + " - " + num2 + " = " + newResult;
+	    checkHistory(robot, history);
 	}
 	
 	private void checkMultiplication(FxRobot robot, String recentResult, String newResult, String num1, String num2) {
@@ -70,13 +105,36 @@ public class ViewTests
 		enterNums(robot, num1, num2);
 		robot.clickOn("#MultButton");
 		checkResult(robot, newResult);
+		if (!num1.contains(".")) {
+	        num1 = num1 + ".0";
+	    }
+	    if (!num2.contains(".")) {
+	        num2 = num2 + ".0";
+	    }
+	    if (!newResult.contains(".")) {
+	        newResult = newResult + ".0";
+	    }
+	    String history = num1 + " * " + num2 + " = " + newResult;
+	    checkHistory(robot, history);
 	}
 	private void checkDivision(FxRobot robot, String recentResult, String newResult, String num1, String num2) {
 		checkResult(robot, recentResult);
 		enterNums(robot, num1, num2);
 		robot.clickOn("#DivideButton");
 		checkResult(robot, newResult);
+		if (!num1.contains(".")) {
+	        num1 = num1 + ".0";
+	    }
+	    if (!num2.contains(".")) {
+	        num2 = num2 + ".0";
+	    }
+	    if (!newResult.contains(".")) {
+	        newResult = newResult + ".0";
+	    }
+	    String history = num1 + " / " + num2 + " = " + newResult;
+	    checkHistory(robot, history);
 	}
+
 	
 	@Test
 	public void testAddition(FxRobot robot) {
@@ -119,8 +177,12 @@ public class ViewTests
 	}
 	
 	@Test
-	public void testMultiple(FxRobot robot) {
+	public void testInterleave(FxRobot robot) {
 		checkSubtraction(robot, "0", "8", "11", "3");
+		checkMultiplication(robot, "8", "12", "3", "4");
+		checkAddition(robot, "12", "500", "319", "181");
+		checkDivision(robot, "500", "0.25", "1", "4");
+		checkDivision(robot, "0.25", "-2", "8", "-4");
 	}
 	
 }
