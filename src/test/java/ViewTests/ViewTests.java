@@ -1,6 +1,7 @@
 package ViewTests;
 
 import java.io.IOException;
+import org.testfx.assertions.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
@@ -8,6 +9,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.CalcModel;
@@ -25,7 +27,7 @@ public class ViewTests
 	    try
 		{
 			BorderPane view = loader.load();
-			MainController cont = new MainController();
+			MainController cont = loader.getController();
 			cont.setModel(new CalcModel());
 			
 			Scene s = new Scene(view);
@@ -44,9 +46,24 @@ public class ViewTests
 		robot.clickOn("#NumberTwo").write(num2);
 	}
 	
+	private void checkResult(FxRobot robot, String result) {
+		Assertions.assertThat(robot.lookup("#ResultsLabel")
+				.queryAs(Label.class)).hasText(result);
+	}
+	
+	private void checkAddition(FxRobot robot, String recentResult, String newResult, String num1, String num2) {
+		checkResult(robot, recentResult);
+		enterNums(robot, num1, num2);
+		robot.clickOn("#AddButton");
+		checkResult(robot, newResult);
+	}
+	
 	@Test
-	public void testButton(FxRobot robot) {
-		enterNums(robot, "12","3");
+	public void testAddition(FxRobot robot) {
+		checkAddition(robot, "0", "15", "10", "5");
+		checkAddition(robot, "15", "20", "7", "13");
+		checkAddition(robot, "20", "8", "9", "-1");
+		checkAddition(robot, "8", "-5", "0", "-5");
 	}
 	
 }
